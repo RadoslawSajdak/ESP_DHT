@@ -10,7 +10,7 @@ const char *SSID = "T-mobile_5G_tests";
 const char *WiFiPassword = WIFI_PASSWORD;
 
 WiFiServer Server(1313);
-WiFiClient RemoteClient;
+
 
 int resetCounter = 0;
 
@@ -42,9 +42,10 @@ void wifiConnect(){
 
 void setup() {
   Serial.begin(9600);
+  dht.begin();
   wifiConnect();
   Server.begin();
-  dht.begin();
+  
 }
 
 
@@ -52,28 +53,21 @@ float h,t;
 void loop() {
   if(WiFi.isConnected())
   {
-    if (Server.hasClient())
+    WiFiClient RemoteClient = Server.available();
+    if (RemoteClient)
     {
-      if (RemoteClient.connected())
-      {
-        Serial.println("Connection rejected");
-        Server.available().stop();
-      }
-      else
-      {
-        uint8_t ReceiveBuffer[32];
-        Serial.println("Connection accepted");
-        RemoteClient = Server.available();
-        while (RemoteClient.connected())
-        { 
-          int received = RemoteClient.read(ReceiveBuffer, sizeof(ReceiveBuffer));
-          if(received > 0){
-              h = dht.readHumidity();
-              t = dht.readTemperature();
-              
-              String toSend = "Temp: " + String(t, 2) + " Hum: " + String(h, 2);
-              RemoteClient.write(toSend.c_str(), toSend.length());
-          }
+      Serial.println("I got client!");
+      uint8_t ReceiveBuffer[30];
+      while (RemoteClient.connected())
+      { 
+        int received = RemoteClient.read(ReceiveBuffer, sizeof(ReceiveBuffer));
+        if(received > 0){
+            h = dht.readHumidity();
+            t = dht.readTemperature();
+            
+            String toSend = "Temp: " + String(t, 2) + " Hum: " + String(h, 2);
+            RemoteClient.write(toSend.c_str(), toSend.length());
+            
         }
       }
     }
