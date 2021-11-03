@@ -3,7 +3,7 @@
 #include "passwords.h"
 
 #define DHTPIN 4     // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT11   // DHT 11
+#define DHTTYPE DHT22   // DHT 11
 DHT dht(DHTPIN, DHTTYPE);
 
 const char *SSID = "T-mobile_5G_tests";
@@ -72,6 +72,7 @@ void loop() {
       }
     }
   }else{
-    wifiConnect();
+    WiFi.reconnect();
   }
+  sleep(1);
 }
